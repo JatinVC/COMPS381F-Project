@@ -15,6 +15,7 @@ router.get('/restaurant/:id', (req, res, next)=>{
     let searchCrit = {
         _id: new ObjectID(req.params.id)
     };
+    //TODO setup pagination for the main page
     global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
         if (err) throw err;
         console.log(result);
@@ -22,4 +23,4 @@ router.get('/restaurant/:id', (req, res, next)=>{
     });
 });
 
-module.exports = router;
+module.exports.router = router;
