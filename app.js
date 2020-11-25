@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const cookieSession = require('cookie-session');
+const session = require('cookie-session');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const http = require('http');
@@ -25,15 +25,19 @@ app.use(function(req, res, next) {
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cookieSession({
+app.use(session({
     name: 'session',
     keys: [process.env.SECRET_KEY_ONE, process.env.SECRET_KEY_TWO]
 }));
 
 //requiring the routes
 const restaurants = require('./routes/restaurants');
+const auth = require('./routes/auth');
 //mounting the routes
-app.use('/', restaurants);
+app.use('/', restaurants.router);
+app.use('/', auth.router);
+
+
 //saving db as global variable, starting express server
 initDB().then(db =>{
     global.db = db[0];
