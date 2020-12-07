@@ -47,16 +47,18 @@ router.post('/api/login', (req, res, next)=>{
     let query = {
         username: username
     }
-    global.db.collection('users').find(query).toArray((err, result)=>{
-        if(result){
-            bcrypt.compare(plainPassword, result[0].password, (err, result)=>{
+    global.db.collection('users').find(query).toArray((err, user)=>{
+        if(user){
+            bcrypt.compare(plainPassword, user[0].password, (err, result)=>{
                 if (err) console.log(err);
                 if(result){
                     req.session.authenticated = true;
                     req.session.username = username;
+                    req.session.userid = user[0]._id.valueOf();
+                    console.log(req.session);
                 }
             });
-            res.redirect('/');
+            // res.redirect('/');
         }else{
             console.log(err);
         }
