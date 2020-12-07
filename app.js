@@ -47,11 +47,4 @@ initDB().then(db =>{
     console.log(err);
 });
 
-app.get('/', (req, res, next)=>{
-    db.collection('restaurants').find().toArray((err, results)=>{
-        if (err) throw err;
-        console.log(results);
-    })
-});
-
 module.exports = app;

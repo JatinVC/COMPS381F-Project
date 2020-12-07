@@ -7,9 +7,17 @@
 </head>
 <body>
     <ul style="list-style-type: none;">
+        <% if (currentPage < pageCount && currentPage != 1){ %>
+            <a href="/<%= parseInt(currentPage) - 1 %>">Previous Page</a>
+            <a href="/<%= parseInt(currentPage) + 1 %>">Next Page</a>
+        <% }else if(currentPage == pageCount && pageCount > 1){ %>
+            <a href="/<%= parseInt(currentPage) - 1 %>">Previous Page</a>
+        <% }else if(currentPage == 1 && pageCount > 1){ %>
+            <a href="/<%= parseInt(currentPage) + 1 %>">Next Page</a>
+        <% } %>
         <% restaurants.forEach(restaurant=>{ %>
             <li><a href="/restaurant/<%= restaurant._id %>"><%= restaurant.name %></a></li>
-        <% }) %> 
+        <% }) %>
     </ul>
 </body>
 </html>
