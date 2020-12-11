@@ -54,13 +54,12 @@ router.post('/api/login', (req, res, next)=>{
                 if(result){
                     req.session.authenticated = true;
                     req.session.username = username;
-                    req.session.userid = user[0]._id.valueOf();
-                    console.log(req.session);
+                    res.redirect('/');
                 }
             });
-            // res.redirect('/');
         }else{
             console.log(err);
+            res.redirect('/');
         }
     }); 
 });

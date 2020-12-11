@@ -1,12 +1,12 @@
 const router = require('express').Router();
 const ObjectID = require('mongodb').ObjectID;
-const authenticate = require('../_helpers/authorize');
+const authorize = require('../_helpers/authorize');
 
 //get all the restaurants in the collection
 //redirect into the first page of all restaurants
-router.get('/', (req, res, next) => res.redirect('/restaurants/1'));
+router.get('/', (req, res, next) => {res.redirect('/restaurants/1');});
 
-router.get('/restaurants/:page', authenticate, async (req, res, next)=>{
+router.get('/restaurants/:page', authorize, async (req, res, next)=>{
     let page = req.params.page;
     let pageLimit = 25;
     let documents = await Promise.all([global.db.collection('restaurants').countDocuments()]);
@@ -24,12 +24,12 @@ router.get('/restaurants/:page', authenticate, async (req, res, next)=>{
     }
 });
 
-router.get('/restaurant/:id', authenticate, (req, res, next)=>{
+router.get('/restaurant/:id', authorize, (req, res, next)=>{
     let searchCrit = {
         _id: new ObjectID(req.params.id)
     };
     global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
-        if (err) throw err;
+        if (err) console.log(error);
         console.log(result);
         res.render('restaurant', {restaurant: result[0]}); 
     });
@@ -72,13 +72,38 @@ router.get('/api/restaurant/cuisine/:cuisine', (req, res, next)=>{
 });
 
 //rate restaurants, only one review per user per restaurant
+
+router.get('/restaurant/:resid/rate', authorize, (req, res, next)=>{
+    res.render('rate')
+});
+
 /*
 algorithm:
 check if the user already has a review in the system for this restaurant
 if does have, cannot give a rating on this restaurant, return them back to the restaurant page with message or something
 if doesn't have, take in the data and create the review by appending it to the end of the grades array of the document.
 */
-router.post('/api/restaurant/:resid/rate', authenticate, (req, res, next)=>{
-
+//TODO: TEST THIS, UNTESTED
+router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    };
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if (err) console.log(error);
+        let username = req.session.username;
+        for(let i = 0; i<result.grades.length; i++){
+            if (result.grades[i].username == username){
+                console.log('you cannot rate again');
+                res.redirect(`/restaurant/${req.params.resid}`);
+            }
+        }
+        let currentDate = Date.now();
+        let gradeDoc = {
+            username: req.session.username,
+            grade: req.body.grade,
+            date: currentDate
+        };
+        global.db.collection('restaurants').update({_id: new ObjectID(req.params.resid)},{$push: gradeDoc});
+    });
 }); 
 module.exports.router = router;

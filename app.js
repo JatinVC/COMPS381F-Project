@@ -2,15 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const session = require('cookie-session');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const cors = require('cors');
 const http = require('http');
 const initDB = require('./lib/db');
-const server = http.createServer(app);
+
 
 //setting stuff
-app.set('port', 3000);
 app.set('view engine', 'ejs');
 
 //allowing requests CORS (Cross origin resource sharing)
@@ -23,24 +21,25 @@ app.use(function(req, res, next) {
 });
 //enabling middlewares
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(session({
+// app.use(cookieParser());
+app.use(cookieSession({
     name: 'session',
     keys: [process.env.SECRET_KEY_ONE, process.env.SECRET_KEY_TWO]
 }));
+app.use(bodyParser.json());
 
 //requiring the routes
 const restaurants = require('./routes/restaurants');
 const auth = require('./routes/auth');
-//mounting the routes
-app.use('/', restaurants.router);
-app.use('/', auth.router);
+//routing the mounts
+app.use(restaurants.router);
+app.use(auth.router);
 
 
 //saving db as global variable, starting express server
 initDB().then(db =>{
     global.db = db[0];
+    const server = http.createServer(app);
     server.listen(3000);
 }).catch(err=>{
     console.log('failed to connect to database');
