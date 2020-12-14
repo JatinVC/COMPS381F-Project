@@ -14,12 +14,12 @@ router.get('/restaurants/:page', authorize, async (req, res, next)=>{
     if(page==1){
         global.db.collection('restaurants').find().limit(pageLimit).toArray((err, results)=>{
             if(err) console.log(err);
-            res.render('restaurants', {restaurants: results, currentPage:page, pageCount});
+            res.render('restaurants', {restaurants: results, currentPage:page, pageCount, search: false, filter:'', query:''});
         })
     }else{
         global.db.collection('restaurants').find().skip(page*pageLimit).limit(pageLimit).toArray((err, results)=>{
             if (err) console.log(err);
-            res.render('restaurants', {restaurants: results, currentPage:page, pageCount});
+            res.render('restaurants', {restaurants: results, currentPage:page, pageCount, search: false, filter:'', query:''});
         });
     }
 });
@@ -104,5 +104,33 @@ router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
         global.db.collection('restaurants').updateOne({_id: new ObjectID(req.params.resid)},{$push: {grades: gradeDoc}});
         res.redirect(`/restaurant/${req.params.resid}`)
     });
-}); 
+});
+
+//search system
+/* 
+Algorithm:
+choose the filter that you want to search for
+its either name, cuisine, borough and the search term, either returns some restaurant, or no restaurant.
+*/
+router.get('/search/:page', async (req, res, next)=>{
+    let searchQuery = {};
+    searchQuery[req.query.filter] = req.query.query
+    let page = req.params.page;
+    let pageLimit = 25;
+    let documents = await Promise.all([global.db.collection('restaurants').countDocuments(searchQuery)]);
+    let pageCount = Math.ceil(documents[0] / pageLimit);
+    if(page==1){
+        //something happens here
+        global.db.collection('restaurants').find(searchQuery).limit(pageLimit).toArray((err, results)=>{
+            if(err) console.log(err);
+            res.render('restaurants', {restaurants:results, currentPage: page, pageCount, search: true, filter: req.query.filter, query: req.query.query});
+        });
+    }else{
+        global.db.collection('restaurants').find(searchQuery).skip(page*pageLimit).limit(pageLimit).toArray((err, results)=>{
+            if(err) console.log(err);
+            res.render('restaurants', {restaurants:results, currentPage:page, pageCount, search: true, filter: req.query.filter, query: req.query.query});
+        })
+    }
+});
+
 module.exports.router = router;
