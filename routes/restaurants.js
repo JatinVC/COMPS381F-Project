@@ -30,7 +30,6 @@ router.get('/restaurant/:id', authorize, (req, res, next)=>{
     };
     global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
         if (err) console.log(error);
-        console.log(result);
         res.render('restaurant', {restaurant: result[0]}); 
     });
 });
@@ -72,9 +71,8 @@ router.get('/api/restaurant/cuisine/:cuisine', (req, res, next)=>{
 });
 
 //rate restaurants, only one review per user per restaurant
-
 router.get('/restaurant/:resid/rate', authorize, (req, res, next)=>{
-    res.render('rate')
+    res.render('rate', {resid:req.params.resid});
 });
 
 /*
@@ -91,19 +89,20 @@ router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
     global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
         if (err) console.log(error);
         let username = req.session.username;
-        for(let i = 0; i<result.grades.length; i++){
-            if (result.grades[i].username == username){
+        for(let i = 0; i<result[0].grades.length; i++){
+            if (result[0].grades[i].username == username){
                 console.log('you cannot rate again');
                 res.redirect(`/restaurant/${req.params.resid}`);
             }
         }
-        let currentDate = Date.now();
+        let currentDate = new Date().toISOString();
         let gradeDoc = {
             username: req.session.username,
-            grade: req.body.grade,
+            grade: req.body.score,
             date: currentDate
         };
-        global.db.collection('restaurants').update({_id: new ObjectID(req.params.resid)},{$push: gradeDoc});
+        global.db.collection('restaurants').updateOne({_id: new ObjectID(req.params.resid)},{$push: {grades: gradeDoc}});
+        res.redirect(`/restaurant/${req.params.resid}`)
     });
 }); 
 module.exports.router = router;
