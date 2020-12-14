@@ -54,6 +54,7 @@ router.post('/api/login', (req, res, next)=>{
                 if(result){
                     req.session.authenticated = true;
                     req.session.username = username;
+                    req.session.userid = user[0]._id.toString();
                     res.redirect('/');
                 }
             });
