@@ -1,12 +1,14 @@
 const router = require('express').Router();
 const ObjectID = require('mongodb').ObjectID;
-const authorize = require('../_helpers/authorize');
+const formidable = require('formidable');
+const fs = require('fs');
 
 //get all the restaurants in the collection
 //redirect into the first page of all restaurants
+//TODO: just make a first page for this system
 router.get('/', (req, res, next) => {res.redirect('/restaurants/1');});
 
-router.get('/restaurants/:page', authorize, async (req, res, next)=>{
+router.get('/restaurants/:page', async (req, res, next)=>{
     let page = req.params.page;
     let pageLimit = 25;
     let documents = await Promise.all([global.db.collection('restaurants').countDocuments()]);
@@ -24,7 +26,7 @@ router.get('/restaurants/:page', authorize, async (req, res, next)=>{
     }
 });
 
-router.get('/restaurant/:id', authorize, (req, res, next)=>{
+router.get('/restaurant/:id', (req, res, next)=>{
     let searchCrit = {
         _id: new ObjectID(req.params.id)
     };
@@ -71,7 +73,7 @@ router.get('/api/restaurant/cuisine/:cuisine', (req, res, next)=>{
 });
 
 //rate restaurants, only one review per user per restaurant
-router.get('/restaurant/:resid/rate', authorize, (req, res, next)=>{
+router.get('/restaurant/:resid/rate', (req, res, next)=>{
     res.render('rate', {resid:req.params.resid});
 });
 
@@ -82,7 +84,7 @@ if does have, cannot give a rating on this restaurant, return them back to the r
 if doesn't have, take in the data and create the review by appending it to the end of the grades array of the document.
 */
 //TODO: TEST THIS, UNTESTED
-router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
+router.post('/api/restaurant/:resid/rate', (req, res, next)=>{
     let searchCrit = {
         _id: new ObjectID(req.params.resid)
     };
@@ -107,11 +109,6 @@ router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
 });
 
 //search system
-/* 
-Algorithm:
-choose the filter that you want to search for
-its either name, cuisine, borough and the search term, either returns some restaurant, or no restaurant.
-*/
 router.get('/search/:page', async (req, res, next)=>{
     let searchQuery = {};
     searchQuery[req.query.filter] = req.query.query

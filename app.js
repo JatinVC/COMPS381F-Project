@@ -42,7 +42,7 @@ app.use(auth.router);
 initDB().then(db =>{
     global.db = db[0];
     const server = http.createServer(app);
-    server.listen(3000);
+    server.listen(4000);
 }).catch(err=>{
     console.log('failed to connect to database');
     console.log(err);
