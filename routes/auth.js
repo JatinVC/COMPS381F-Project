@@ -25,7 +25,6 @@ router.post('/api/register', (req, res, next)=>{
 
     bcrypt.genSalt(saltRounds, (err, salt)=>{
         bcrypt.hash(plainPassword, salt, (err, hash)=>{
-            //TODO add the user to the database
             var document = {
                 username: username,
                 password: hash,
@@ -40,24 +39,32 @@ router.post('/api/register', (req, res, next)=>{
 });
 
 router.post('/api/login', (req, res, next)=>{
+    //TODO refactor for test cases to work
     let username = req.body.username;
     let plainPassword = req.body.password;
 
-    //do the query to get the data for the user based on the username given
     let query = {
         username: username
     }
     global.db.collection('users').find(query).toArray((err, user)=>{
         if(user){
-            bcrypt.compare(plainPassword, user[0].password, (err, result)=>{
-                if (err) console.log(err);
-                if(result){
-                    req.session.authenticated = true;
-                    req.session.username = username;
-                    req.session.userid = user[0]._id.toString();
-                    res.redirect('/');
-                }
-            });
+            if(user[0].password == ''){
+                //if the user has no password saved, and the username is correct, user is authenticated
+                req.session.authenticated = true;
+                req.session.username = username;
+                req.session.userid = user[0]._id.toString();
+                res.redirect('/');
+            }else{
+                bcrypt.compare(plainPassword, user[0].password, (err, result)=>{
+                    if (err) console.log(err);
+                    if(result){
+                        req.session.authenticated = true;
+                        req.session.username = username;
+                        req.session.userid = user[0]._id.toString();
+                        res.redirect('/');
+                    }
+                });
+            }
         }else{
             console.log(err);
             res.redirect('/');
