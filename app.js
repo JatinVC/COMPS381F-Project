@@ -6,6 +6,7 @@ const cookieSession = require('cookie-session');
 const cors = require('cors');
 const http = require('http');
 const initDB = require('./lib/db');
+const authorize = require('./_helpers/authorize');
 
 
 //setting stuff
@@ -27,6 +28,7 @@ app.use(cookieSession({
     keys: [process.env.SECRET_KEY_ONE, process.env.SECRET_KEY_TWO]
 }));
 app.use(bodyParser.json());
+app.use(authorize);
 
 //requiring the routes
 const restaurants = require('./routes/restaurants');

@@ -1,7 +1,20 @@
 module.exports = (req, res, next)=>{
-        if(req.session.authenticated){
+    let pathAllowed = [
+        '/',
+        '/login',
+        '/api/login',
+        '/register',
+        '/api/register',
+        '/api/logout'
+    ]
+    for(let path in pathAllowed){
+        if(path == req.path){
             next();
-        }else{
-            res.redirect('/login');
         }
+    }
+    if(req.session.authenticated){
+        next();
+    }else{
+        res.redirect('/login');
+    }
 }
