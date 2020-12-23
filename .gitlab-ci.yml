@@ -1,0 +1,22 @@
+variables:
+    DEPLOY_DIR: "/var/www/comps381f"
+    GIT_URL: git@gitlab.jatinc.io:comps381f-project/restaurant-backend.git
+
+stages:
+    - deploy
+
+cache:
+    key:
+        files: 
+            - package.json 
+    paths:
+        - node_modules/
+
+deploy_to_prod_server:
+    tags:
+        - production
+    only:
+        - master
+    stage: deploy
+    script:
+        - bash deploy/deploy.sh
