@@ -9,12 +9,12 @@ module.exports = (req, res, next)=>{
     ]
     for(let path in pathAllowed){
         if(path == req.path){
-            next();
+            return next();
         }
     }
     if(req.session.authenticated){
-        next();
+        return next();
     }else{
-        res.redirect('/login');
+        return res.redirect('/login');
     }
 }
