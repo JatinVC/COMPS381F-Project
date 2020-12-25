@@ -3,12 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Rate Restaurant</title>
 </head>
-<body>
+<body style="background-color: #E2979C;text-align: center;">
+    <div style="height: 30vh; padding-top: 30vh; background-color: #ACE6D0;">
+        <h1>Rate for this restaurant</h1>
+        <h3>Choose a score in 1-10 and submit</h3>
+    </div> 
     <form action="/api/restaurant/<%=resid%>/rate" method="POST">
-        <input type="number" name="score" min="1" max="10">
-        <input type="submit">
+       <lable style="font-size:xx-large;">Select a score</lable>
+       <br>
+         <input type="number" name="score" min="1" max="10" style="width: 25%; text-align: center; border-radius: 30px;height: 6vh;font-size: xx-large;">
+         <br>
+         <br>
+        <input type="submit" style="width:20%;height:5vh">
     </form>
 </body>
 </html>

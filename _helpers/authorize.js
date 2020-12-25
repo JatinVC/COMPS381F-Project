@@ -7,8 +7,8 @@ module.exports = (req, res, next)=>{
         '/api/register',
         '/api/logout'
     ]
-    for(let path in pathAllowed){
-        if(path == req.path){
+    for(let i=0;i<pathAllowed.length;i++){
+        if(pathAllowed[i] == req.path){
             return next();
         }
     }

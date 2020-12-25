@@ -2,12 +2,15 @@ const router = require('express').Router();
 const ObjectID = require('mongodb').ObjectID;
 const formidable = require('formidable');
 const fs = require('fs');
-
+const url = require('url');
+const assert = require('assert');
 //get all the restaurants in the collection
 //redirect into the first page of all restaurants
 //TODO: just make a first page for this system
 router.get('/', (req, res, next) => {res.redirect('/restaurants/1');});
 
+router.get('/creatrestaurant', (re, res, next) => { 
+    res.render('creatrestaurant');});
 router.get('/restaurants/:page', async (req, res, next)=>{
     let page = req.params.page;
     let pageLimit = 25;
@@ -76,7 +79,53 @@ router.get('/api/restaurant/cuisine/:cuisine', (req, res, next)=>{
 router.get('/restaurant/:resid/rate', (req, res, next)=>{
     res.render('rate', {resid:req.params.resid});
 });
-
+//delete restaurant
+router.get('/restaurant/:resid/delete', (req, res, next)=>{
+    let username=req.session.username;
+    let owner= global.db.collection('restaurants').find({resid:req.params.resid});
+    if (owner.username == username){
+        global.db.collection('restaurants').remove({resid:req.params.resid})
+    }
+    else{
+    res.render('warn');
+    }
+});
+//update restaurant
+router.get('/restaurant/:resid/edit', (req, res, next)=>{
+    let username=req.session.username;
+    let owner= global.db.collection('restaurants').find({resid:req.params.resid});
+    if (owner.username == username){
+        res.render('edit', {resid:req.params.resid});
+    }
+    else{
+    res.render('warn');
+    }
+});
+router.post('/api/updaterestaurant', (req, res, next)=>{
+    let restaurantname = req.body.name;
+    let borough = req.body.borough;
+    let cuisine = req.body.cuisine;
+    let street = req.body.street;
+    let building = req.body.building;
+    let zipcode = req.body.zipcode;
+    let coord = req.body.coord;
+    let score = req.body.score;
+    let owner = req.session.username;
+    var changeDoc = {
+        name : restaurantname,
+        borough : borough,
+        cuisine : cuisine,
+        street : street,
+        building : building,
+        zipcode : zipcode,
+        coord : coord,
+        score : score,
+        owner : owner,
+    };
+    global.db.collection('restaurants').updateOne({_id: new ObjectID(req.params.resid)},{$push: {grades: changeDoc}});
+    res.redirect(`/restaurant/${req.params.resid}`)
+    
+});
 /*
 algorithm:
 check if the user already has a review in the system for this restaurant
@@ -129,5 +178,32 @@ router.get('/search/:page', async (req, res, next)=>{
         })
     }
 });
-
+router.post('/api/creatrestaurant', (req, res, next)=>{
+            let restaurantname = req.body.name;
+            let borough = req.body.borough;
+            let cuisine = req.body.cuisine;
+            let street = req.body.street;
+            let building = req.body.building;
+            let zipcode = req.body.zipcode;
+            let coord = req.body.coord;
+            let score = req.body.score;
+            let owner = req.session.username;
+            var newrestaurant = {
+                name : restaurantname,
+                borough : borough,
+                cuisine : cuisine,
+                street : street,
+                building : building,
+                zipcode : zipcode,
+                coord : coord,
+                score : score,
+                owner : owner,
+            };
+                    global.db.collection('restaurants').insertOne(newrestaurant, (err)=>{
+                        if(err) console.log(err);
+                        res.redirect('/');
+                    })
+              
+            
+        });
 module.exports.router = router;
