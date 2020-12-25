@@ -81,26 +81,43 @@ router.get('/restaurant/:resid/rate', (req, res, next)=>{
 });
 //delete restaurant
 router.get('/restaurant/:resid/delete', (req, res, next)=>{
-    let username=req.session.username;
-    let owner= global.db.collection('restaurants').find({resid:req.params.resid});
-    if (owner.username == username){
-        global.db.collection('restaurants').remove({resid:req.params.resid})
-    }
-    else{
-    res.render('warn');
-    }
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    };
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if (err) console.log(error);
+        let username = req.session.username;
+            if (result[0].owner == username){
+                global.db.collection('restaurants').deleteOne({_id: new ObjectID(req.params.resid)})
+                res.redirect(`/`);
+            }
+            else{
+                res.render('warn');
+                }
+        
+  
+})
 });
+
+
 //update restaurant
 router.get('/restaurant/:resid/edit', (req, res, next)=>{
-    let username=req.session.username;
-    let owner= global.db.collection('restaurants').find({resid:req.params.resid});
-    if (owner.username == username){
-        res.render('edit', {resid:req.params.resid});
-    }
-    else{
-    res.render('warn');
-    }
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    };
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if (err) console.log(error);
+        let username = req.session.username;
+            if (result[0].owner == username){
+                res.render('edit', {resid:req.params.resid});
+            }
+            else{
+                res.render('warn');
+                }
 });
+});
+
+
 router.post('/api/updaterestaurant', (req, res, next)=>{
     let restaurantname = req.body.name;
     let borough = req.body.borough;
@@ -122,7 +139,8 @@ router.post('/api/updaterestaurant', (req, res, next)=>{
         score : score,
         owner : owner,
     };
-    global.db.collection('restaurants').updateOne({_id: new ObjectID(req.params.resid)},{$push: {grades: changeDoc}});
+    global.db.collection('restaurants').updateOne({_id: new ObjectID(req.params.resid)},{$push: {name: changeDoc,  borough:changeDoc, cuisine:changeDoc,street :changeDoc,building :changeDoc, zipcode :changeDoc
+       , coord :changeDoc,  score :changeDoc, owner :changeDoc }});
     res.redirect(`/restaurant/${req.params.resid}`)
     
 });
