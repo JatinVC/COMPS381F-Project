@@ -43,29 +43,9 @@
         marker.addTo(map);
     </script>
     <br>
-
-    <img src="data:<%=restaurant.mimetype%>;base64, <%=restaurant.photo%>" alt="restaurant image">
-
-    <br>
-    <p> Borough: <%= restaurant.borough %> 
-        Cuisine: <%= restaurant.cuisine %>
-        Street: <%= restaurant.address.street %>
-        Building: <%= restaurant.address.building %>
-        Zipcode: <%= restaurant.address.zipcode %>
-        Created by: <%= restaurant.owner %>
-    </p>
-
-    <!-- ratings -->
-    <ul style="list-style-type:none;">
-        <% restaurant.grades.forEach(rating=>{ %>
-            <li><%= rating.username %> : <%= rating.grade %> Date:<%=rating.date%></li>
-        <% }) %>
-    </ul>
-
+    <p>Borough: Cuisine: Street: Building: Zipcode: GPS: [139.699367,35.691780] Rating: Created by:    </p>
     <button onclick="location.href='/restaurant/<%= restaurant._id.toString() %>/rate'" style="width: 30%;height: 8vh;border-radius: 40px;">Rate this restaurant</button>
     <button onclick="location.href='/restaurant/<%= restaurant._id.toString() %>/edit'" style="width: 30%;height: 8vh;border-radius: 40px;">Edit this restaurant</button>
-    <form action='/api/restaurant/<%= restaurant._id.toString() %>/delete' method="POST">
-        <input type="submit" value="delete restaurant">
-    </form>
+    <button onclick="location.href='/restaurant/<%= restaurant._id.toString() %>/delete'" style="width: 30%;height: 8vh;border-radius: 40px;">Delete this restaurant</button>
 </body>
 </html>
