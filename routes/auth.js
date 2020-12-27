@@ -48,7 +48,7 @@ router.post('/api/login', (req, res, next)=>{
     }
     global.db.collection('users').find(query).toArray((err, user)=>{
         if(user){
-            if(user[0].password == ''){
+            if(user[0].password == null){
                 //if the user has no password saved, and the username is correct, user is authenticated
                 req.session.authenticated = true;
                 req.session.username = username;

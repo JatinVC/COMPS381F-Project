@@ -9,7 +9,7 @@
 </head>
 <body style="background-color: #E2979C;">
     <div class="w3-col s3"><p></p></div>
-    <div class="w3-col s6" style="text-align: center; height: 100vh;background-color: #D7894B;">
+    <div class="w3-col s6" style="text-align: center; height: 105vh;background-color: #D7894B;">
         <h1>Restaurants</h1>
         <hr>
     <form action="/search/1" method="GET">
@@ -50,5 +50,7 @@
         <% } %>
     <% } %> 
     <p>currentPage:<%=currentPage%></p>
+    <hr>
+    <button onclick="location.href='/restaurants/create'" style="width: 30%;height: 8vh;border-radius: 40px;">Create new restaurant</button>
 </body>
 </html>
