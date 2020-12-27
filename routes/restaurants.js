@@ -101,7 +101,27 @@ router.get('/search/:page', async (req, res, next)=>{
 
 //rate restaurants, only one review per user per restaurant
 router.get('/restaurant/:resid/rate', (req, res, next)=>{
-    res.render('rate', {resid:req.params.resid});
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    }
+
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            let userFound = false;
+            for(let i = 0; i<result[0].grades.length; i++){
+                if(result[0].grades[i].username == req.session.username){
+                    userFound = true;
+                    res.redirect(`/restaurant/${req.params.resid}`);
+                }
+            }
+            //if you haven't rated the restaurant, then you can rate
+            if(userFound == false){
+                res.render('rate', {resid:req.params.resid});
+            }
+        }
+    })
 });
 
 router.post('/api/restaurant/:resid/rate', (req, res, next)=>{

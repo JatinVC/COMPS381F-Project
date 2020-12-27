@@ -58,7 +58,7 @@
     <!-- ratings -->
     <ul style="list-style-type:none;">
         <% restaurant.grades.forEach(rating=>{ %>
-            <li><%= rating.score %> Date:<%=rating.date%>/li>
+            <li><%= rating.username %> : <%= rating.grade %> Date:<%=rating.date%></li>
         <% }) %>
     </ul>
 
