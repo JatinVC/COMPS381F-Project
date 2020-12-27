@@ -6,6 +6,7 @@ const cookieSession = require('cookie-session');
 const cors = require('cors');
 const http = require('http');
 const initDB = require('./lib/db');
+const authorize = require('./_helpers/authorize');
 
 
 //setting stuff
@@ -27,6 +28,7 @@ app.use(cookieSession({
     keys: [process.env.SECRET_KEY_ONE, process.env.SECRET_KEY_TWO]
 }));
 app.use(bodyParser.json());
+app.use(authorize);
 
 //requiring the routes
 const restaurants = require('./routes/restaurants');
@@ -40,7 +42,7 @@ app.use(auth.router);
 initDB().then(db =>{
     global.db = db[0];
     const server = http.createServer(app);
-    server.listen(3000);
+    server.listen(4000);
 }).catch(err=>{
     console.log('failed to connect to database');
     console.log(err);

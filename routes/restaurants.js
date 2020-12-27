@@ -1,12 +1,18 @@
 const router = require('express').Router();
 const ObjectID = require('mongodb').ObjectID;
-const authorize = require('../_helpers/authorize');
+const formidable = require('formidable');
+const fs = require('fs');
 
-//get all the restaurants in the collection
-//redirect into the first page of all restaurants
+//home page redirect to the first page of restaurants
 router.get('/', (req, res, next) => {res.redirect('/restaurants/1');});
 
-router.get('/restaurants/:page', authorize, async (req, res, next)=>{
+//create new restaurant page
+router.get('/restaurants/create', (req, res, next) => { 
+    res.render('createrestaurant');
+});
+
+//show all restaurants using pagination
+router.get('/restaurants/:page', async (req, res, next)=>{
     let page = req.params.page;
     let pageLimit = 25;
     let documents = await Promise.all([global.db.collection('restaurants').countDocuments()]);
@@ -24,7 +30,8 @@ router.get('/restaurants/:page', authorize, async (req, res, next)=>{
     }
 });
 
-router.get('/restaurant/:id', authorize, (req, res, next)=>{
+//look at the individual restaurant
+router.get('/restaurant/:id', (req, res, next)=>{
     let searchCrit = {
         _id: new ObjectID(req.params.id)
     };
@@ -70,19 +77,54 @@ router.get('/api/restaurant/cuisine/:cuisine', (req, res, next)=>{
     });
 });
 
-//rate restaurants, only one review per user per restaurant
-router.get('/restaurant/:resid/rate', authorize, (req, res, next)=>{
-    res.render('rate', {resid:req.params.resid});
+//search system
+router.get('/search/:page', async (req, res, next)=>{
+    let searchQuery = {};
+    searchQuery[req.query.filter] = req.query.query
+    let page = req.params.page;
+    let pageLimit = 25;
+    let documents = await Promise.all([global.db.collection('restaurants').countDocuments(searchQuery)]);
+    let pageCount = Math.ceil(documents[0] / pageLimit);
+    if(page==1){
+        //something happens here
+        global.db.collection('restaurants').find(searchQuery).limit(pageLimit).toArray((err, results)=>{
+            if(err) console.log(err);
+            res.render('restaurants', {restaurants:results, currentPage: page, pageCount, search: true, filter: req.query.filter, query: req.query.query});
+        });
+    }else{
+        global.db.collection('restaurants').find(searchQuery).skip(page*pageLimit).limit(pageLimit).toArray((err, results)=>{
+            if(err) console.log(err);
+            res.render('restaurants', {restaurants:results, currentPage:page, pageCount, search: true, filter: req.query.filter, query: req.query.query});
+        })
+    }
 });
 
-/*
-algorithm:
-check if the user already has a review in the system for this restaurant
-if does have, cannot give a rating on this restaurant, return them back to the restaurant page with message or something
-if doesn't have, take in the data and create the review by appending it to the end of the grades array of the document.
-*/
-//TODO: TEST THIS, UNTESTED
-router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
+//rate restaurants, only one review per user per restaurant
+router.get('/restaurant/:resid/rate', (req, res, next)=>{
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    }
+
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            let userFound = false;
+            for(let i = 0; i<result[0].grades.length; i++){
+                if(result[0].grades[i].username == req.session.username){
+                    userFound = true;
+                    res.redirect(`/restaurant/${req.params.resid}`);
+                }
+            }
+            //if you haven't rated the restaurant, then you can rate
+            if(userFound == false){
+                res.render('rate', {resid:req.params.resid});
+            }
+        }
+    })
+});
+
+router.post('/api/restaurant/:resid/rate', (req, res, next)=>{
     let searchCrit = {
         _id: new ObjectID(req.params.resid)
     };
@@ -106,31 +148,176 @@ router.post('/api/restaurant/:resid/rate', authorize, (req, res, next)=>{
     });
 });
 
-//search system
-/* 
-Algorithm:
-choose the filter that you want to search for
-its either name, cuisine, borough and the search term, either returns some restaurant, or no restaurant.
-*/
-router.get('/search/:page', async (req, res, next)=>{
-    let searchQuery = {};
-    searchQuery[req.query.filter] = req.query.query
-    let page = req.params.page;
-    let pageLimit = 25;
-    let documents = await Promise.all([global.db.collection('restaurants').countDocuments(searchQuery)]);
-    let pageCount = Math.ceil(documents[0] / pageLimit);
-    if(page==1){
-        //something happens here
-        global.db.collection('restaurants').find(searchQuery).limit(pageLimit).toArray((err, results)=>{
-            if(err) console.log(err);
-            res.render('restaurants', {restaurants:results, currentPage: page, pageCount, search: true, filter: req.query.filter, query: req.query.query});
-        });
-    }else{
-        global.db.collection('restaurants').find(searchQuery).skip(page*pageLimit).limit(pageLimit).toArray((err, results)=>{
-            if(err) console.log(err);
-            res.render('restaurants', {restaurants:results, currentPage:page, pageCount, search: true, filter: req.query.filter, query: req.query.query});
-        })
-    }
+//delete restaurant
+router.post('/api/restaurant/:resid/delete', (req, res, next)=>{
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    };
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if (err) console.log(error);
+        if(result[0].owner){
+            if (result[0].owner == req.session.username){
+                global.db.collection('restaurants').deleteOne(searchCrit)
+                .then(result=>{
+                    if(result){
+                        res.redirect('/restaurants/1')
+                    }
+                })
+                .catch(err=>{
+                    if(err){
+                        res.redirect(`/restaurant/${req.params.resid}`, {message: 'error deleting file'});
+                    }
+                });
+            }
+            else{
+                res.render('warn');
+            }
+        }else{
+            //delete it if there is no owner
+            global.db.collection('restaurants').deleteOne(searchCrit)
+            .then(result=>{
+                if(result){
+                    res.redirect('/restaurants/1')
+                }
+            })
+            .catch(err=>{
+                if(err){
+                    res.redirect(`/restaurant/${req.params.resid}`, {message: 'error deleting file'});
+                }
+            });
+        }
+    })
+});
+
+//update restaurant, add more information to just make this easier lol
+router.get('/restaurant/:resid/edit', (req, res, next)=>{
+    let searchCrit = {
+        _id: new ObjectID(req.params.resid)
+    };
+    global.db.collection('restaurants').find(searchCrit).toArray((err, result)=>{
+        if (err) console.log(error);
+        if(result[0].owner){
+            if (result[0].owner == req.session.username){
+                res.render('edit', {restaurant:result[0]});
+            }
+            else{
+                res.render('warn');
+            }
+        }else{
+            res.render('edit', {restaurant:result[0]});
+        }
+    });
+});
+
+router.post('/api/restaurant/:resid/edit', (req, res, next)=>{
+    //add image insertion in here as well
+    const form = new formidable.IncomingForm();
+    form.parse(req, function(err, fields, files){
+        if(err){
+            console.log(err);
+        }else{
+            let updateQuery = {
+                name: fields.name,
+                borough: fields.borough,
+                cuisine: fields.cuisine,
+                address:{
+                    street: fields.street,
+                    building: fields.building,
+                    zipcode: fields.zipcode,
+                    coord: [fields.long,fields.lat]
+                },
+            }
+        
+            if(files.photo.size > 0){
+                fs.readFile(files.photo.path, (err, data)=>{
+                    if(err){
+                        console.log(err);
+                    }else{
+                        // convert the picture to base 64 for insertion
+                        updateQuery['mimetype'] = files.photo.type;
+                        updateQuery['photo'] = new Buffer.from(data).toString('base64');
+                        // insertion of the new document
+                        // find the restaurant we want to update
+                        let findQuery = {
+                            _id: new ObjectID(req.params.resid),
+                        }
+                        global.db.collection('restaurants').updateOne(findQuery, {$set: updateQuery}, {upsert:true})
+                        .then(result=>{
+                            if(result){
+                                res.redirect(`/restaurant/${req.params.resid}`);
+                            }
+                        })
+                        .catch(err=>{
+                            if(err){
+                                res.redirect(`/restaurant/${req.params.resid}`, {message: err});
+                            }   
+                        });
+                    }
+                })
+            }else{
+                //update document without the picture
+                let findQuery = {
+                    _id: new ObjectID(req.params.resid),
+                }
+                global.db.collection('restaurants').updateOne(findQuery, {$set: updateQuery}, {upsert:true})
+                .then(result=>{
+                    if(result){
+                        res.redirect(`/restaurant/${req.params.resid}`);
+                    }
+                })
+                .catch(err=>{
+                    if(err){
+                        res.redirect(`/restaurant/${req.params.resid}`, {message: err});
+                    }   
+                });
+            }
+        }
+    })
+});
+
+router.post('/api/restaurant/create', (req, res, next)=>{
+    //convert photo to base64
+    let form = new formidable.IncomingForm();
+    form.parse(req, (err, fields, files)=>{
+        if(err){
+            console.log(err);
+        }else{
+            let insertQuery = {
+                name: fields.name || '',
+                borough: fields.borough || '',
+                cuisine: fields.cuisine || '',
+                address: {
+                    street: fields.street || '',
+                    building: fields.building || '',
+                    zipcode: fields.zipcode || '',
+                    coord: [fields.lat, fields.long] || [],
+                },
+                grades: [],
+                owner: req.session.username
+            }
+            if(files.photo.size > 0){
+                fs.readFile(files.photo.path, (err, data)=>{
+                    if(err){
+                        console.log(err);
+                    }else{
+                        //convert the picture to base64
+                        insertQuery['mimetype'] = files.photo.type;
+                        insertQuery['photo'] = new Buffer.from(data).toString('base64');
+                        //insertion here
+                        global.db.collection('restaurants').insertOne(insertQuery)
+                        .then(result=>{
+                            res.redirect('/');
+                        })
+                    }
+                });
+            }else{
+                global.db.collection('restaurants').insertOne(insertQuery)
+                .then(result=>{
+                    res.redirect('/');
+                })
+            }
+        }
+    });   
 });
 
 module.exports.router = router;

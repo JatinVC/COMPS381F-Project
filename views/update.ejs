@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>update <%= restaurant.name %></title>
+</head>
+<body>
+    <h1>update <%= restaurant.name %></h1>
+    <form action="/api/<%=restaurant._id.toString() %>" method="POST">
+        <input type="text" name="name" value="<%=restaurant.name %>">
+        <input type="text" name="borough" value="<%=restaurant.borough %>">
+        <input type="text" name="cuisine" value="<%=restaurant.cuisine %>">
+        <input type="submit" value="update restaurant">
+    </form>
+</body>
+</html>

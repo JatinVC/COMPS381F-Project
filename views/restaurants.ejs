@@ -3,45 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
     <title>Restaurants</title>
 </head>
-<body>
-    
+<body style="background-color: #E2979C;">
+    <div class="w3-col s3"><p></p></div>
+    <div class="w3-col s6" style="text-align: center; height: 105vh;background-color: #D7894B;">
+        <h1>Restaurants</h1>
+        <hr>
     <form action="/search/1" method="GET">
-        <label for="filter">Search</label>
         <select name="filter" id="filter">
             <option value="borough">Borough</option>
             <option value="cuisine">Cuisine</option>
             <option value="name">Name</option>
         </select>
-        <input type="text" name="query">
-        <input type="submit" value="search">
+        <input type="text" name="query" placeholder="Search..">
+        <input type="submit" value="search" style="width:10%;border-radius: 30px;">
     </form>
+    <hr>
 
     <ul style="list-style-type: none;">
-        <% if(search){ %> 
-            <% if (currentPage < pageCount && currentPage != 1){ %>
-                <a href="/search/<%= parseInt(currentPage) - 1 %>?filter=<%=filter%>&query=<%=query%>">Previous Page</a>
-                <a href="/search/<%= parseInt(currentPage) + 1 %>?filter=<%=filter%>&query=<%=query%>">Next Page</a>
-            <% }else if(currentPage == pageCount && pageCount > 1){ %>
-                <a href="/search/<%= parseInt(currentPage) - 1 %>?filter=<%=filter%>&query=<%=query%>">Previous Page</a>
-            <% }else if(currentPage == 1 && pageCount > 1){ %>
-                <a href="/search/<%= parseInt(currentPage) + 1 %>?filter=<%=filter%>&query=<%=query%>">Next Page</a>
-            <% } %>
-        <% }else{ %>
-            <% if (currentPage < pageCount && currentPage != 1){ %>
-                <a href="/restaurants/<%= parseInt(currentPage) - 1 %>">Previous Page</a>
-                <a href="/restaurants/<%= parseInt(currentPage) + 1 %>">Next Page</a>
-            <% }else if(currentPage == pageCount && pageCount > 1){ %>
-                <a href="/restaurants/<%= parseInt(currentPage) - 1 %>">Previous Page</a>
-            <% }else if(currentPage == 1 && pageCount > 1){ %>
-                <a href="/restaurants/<%= parseInt(currentPage) + 1 %>">Next Page</a>
-            <% } %>
-        <% } %> 
         <!--Hey Jay, Just update this part here, the above is the page stuff, you can try to style it more if you would like-->
         <% restaurants.forEach(restaurant=>{ %>
             <li><a href="/restaurant/<%= restaurant._id %>"><%= restaurant.name %></a></li>
         <% }) %>
     </ul>
+    <hr>
+    <% if(search){ %> 
+        <% if (currentPage < pageCount && currentPage != 1){ %>
+            <a href="/search/<%= parseInt(currentPage) - 1 %>?filter=<%=filter%>&query=<%=query%>">Previous Page</a>
+            <a href="/search/<%= parseInt(currentPage) + 1 %>?filter=<%=filter%>&query=<%=query%>">Next Page</a>
+        <% }else if(currentPage == pageCount && pageCount > 1){ %>
+            <a href="/search/<%= parseInt(currentPage) - 1 %>?filter=<%=filter%>&query=<%=query%>">Previous Page</a>
+        <% }else if(currentPage == 1 && pageCount > 1){ %>
+            <a href="/search/<%= parseInt(currentPage) + 1 %>?filter=<%=filter%>&query=<%=query%>">Next Page</a>
+        <% } %>
+    <% }else{ %>
+        <% if (currentPage < pageCount && currentPage != 1){ %>
+            <a href="/restaurants/<%= parseInt(currentPage) - 1 %>">Previous Page</a>
+            <a href="/restaurants/<%= parseInt(currentPage) + 1 %>">Next Page</a>
+        <% }else if(currentPage == pageCount && pageCount > 1){ %>
+            <a href="/restaurants/<%= parseInt(currentPage) - 1 %>">Previous Page</a>
+        <% }else if(currentPage == 1 && pageCount > 1){ %>
+            <a href="/restaurants/<%= parseInt(currentPage) + 1 %>">Next Page</a>
+        <% } %>
+    <% } %> 
+    <p>currentPage:<%=currentPage%></p>
+    <hr>
+    <button onclick="location.href='/restaurants/create'" style="width: 30%;height: 8vh;border-radius: 40px;">Create new restaurant</button>
 </body>
 </html>

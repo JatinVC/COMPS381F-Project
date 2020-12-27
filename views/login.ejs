@@ -3,15 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Login</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>Login</title>
 </head>
-<body>
-    <form action="/api/login" method="POST">
-        username: <input type="text" name="username">
+<body style="background-color: #E2979C;">
+    <div class="w3-col s3"><p></p></div>
+    <div class="w3-col s6" style="text-align: center; height: 100vh; ">
+    <div style="margin-top:20%;background-color: #D7D135; height: 55VH;text-align: center;width: 100%;padding-top: 5%;">
+        <h1>Welcome to restaurant~</h1>
+        <hr>
+        <div style="background-color: #ACE6D0;width: 65%; text-align: center;padding-top:5%;margin-left:15%;height: 30vh;">
+        <form action="/api/login" method="POST">
+        <input type="text" name="username" placeholder="username" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " required>
         <br>
-        password: <input type="password" name="password">
         <br>
-        <input type="submit" value="Login">
-    </form>
+        <input type="password" name="password" placeholder="password" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; ">
+        <br>
+        <br>
+        <input type="submit" value="Login" style="width:30%;border-radius: 30px;">
+        </form>
+         </div>
+    </div>
+    </div>  
+    <div class="w3-col s3"><p></p></div>
 </body>
 </html>

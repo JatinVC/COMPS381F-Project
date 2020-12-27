@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= restaurant.name %></title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link 
         rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
         integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
@@ -16,9 +17,10 @@
         crossorigin=""
     ></script>
 </head>
-<body>
+<body style="background-color: #E2979C; text-align: center;">
     <h1><%= restaurant['name'] %> </h1>
-    <div id = "map" style = "width: 900px; height: 580px"></div>
+    <hr>
+    <div id = "map" style = "width: 900px; height: 580px;margin-left: 20%;"></div>
     <script>
         //saving everything
         // Creating map options
@@ -40,6 +42,30 @@
         // Adding marker to the map
         marker.addTo(map);
     </script>
-    <button onclick="location.href='/restaurant/<%= restaurant._id.toString() %>/rate'">Rate this restaurant</button>
+    <br>
+
+    <img src="data:<%=restaurant.mimetype%>;base64, <%=restaurant.photo%>" alt="restaurant image">
+
+    <br>
+    <p> Borough: <%= restaurant.borough %> 
+        Cuisine: <%= restaurant.cuisine %>
+        Street: <%= restaurant.address.street %>
+        Building: <%= restaurant.address.building %>
+        Zipcode: <%= restaurant.address.zipcode %>
+        Created by: <%= restaurant.owner %>
+    </p>
+
+    <!-- ratings -->
+    <ul style="list-style-type:none;">
+        <% restaurant.grades.forEach(rating=>{ %>
+            <li><%= rating.username %> : <%= rating.grade %> Date:<%=rating.date%></li>
+        <% }) %>
+    </ul>
+
+    <button onclick="location.href='/restaurant/<%= restaurant._id.toString() %>/rate'" style="width: 30%;height: 8vh;border-radius: 40px;">Rate this restaurant</button>
+    <button onclick="location.href='/restaurant/<%= restaurant._id.toString() %>/edit'" style="width: 30%;height: 8vh;border-radius: 40px;">Edit this restaurant</button>
+    <form action='/api/restaurant/<%= restaurant._id.toString() %>/delete' method="POST">
+        <input type="submit" value="delete restaurant">
+    </form>
 </body>
 </html>
