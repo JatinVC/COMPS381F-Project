@@ -11,24 +11,22 @@
     <div class="w3-col s6" style="text-align: center; height: 100vh;background-color: #BED3F6; ">
         <h2>Change Restaurant information</h2>
         <hr>
-        <form action="/api/updaterestaurant" method="POST">
+        <form action="/api/restaurant/<%=restaurant._id.toString() %>/edit" method="POST" enctype="multipart/form-data">
         <h3>Restaurant Detail</h3>
-        <input type="text" name="name" placeholder="name" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " required><br><br>
-        <input type="text" name="borough" placeholder="borough" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; "><br><br>
-        <input type="text" name="cuisine" placeholder="cuisine" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " ><br><br>
+        <input type="text" name="name" placeholder="name" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " required value="<%= restaurant.name %>"><br><br>
+        <input type="text" name="borough" placeholder="borough" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " value="<%= restaurant.borough %>"><br><br>
+        <input type="text" name="cuisine" placeholder="cuisine" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " value="<%= restaurant.cuisine %>"><br><br>
 
        <lable>Restaurant photo:      </lable> <input type="file" name="photo" style="margin-left: 9%;">
        <br>
        <h3>Address</h3>
-       <input type="text" name="street" placeholder="street" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; ">
-        <input type="text" name="building" placeholder="building" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " >
-        <input type="text" name="zipcode" placeholder="zipcode" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; ">
-        <input type="text" name="coord" placeholder="coordx" style="border-radius: 30px;height: 5vh; width: 40%; text-align: center; " >
-        <input type="text" name="coord" placeholder="coordy" style="border-radius: 30px;height: 5vh; width: 40%; text-align: center; " >
+       <input type="text" name="street" placeholder="street" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " value="<%= restaurant.address.street %>">
+        <input type="text" name="building" placeholder="building" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " value="<%= restaurant.address.building %>">
+        <input type="text" name="zipcode" placeholder="zipcode" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; " value="<%= restaurant.address.zipcode %>">
+        <input type="text" name="lat" placeholder="coordx" style="border-radius: 30px;height: 5vh; width: 40%; text-align: center; " value="<%= restaurant.address.coord[0] %>">
+        <input type="text" name="long" placeholder="coordy" style="border-radius: 30px;height: 5vh; width: 40%; text-align: center; " value="<%= restaurant.address.coord[1] %>">
         <hr>
-        <h3>Grade</h3>
-        <input type="number" name="score" placeholder="score" min="1" max="10" style="border-radius: 30px;height: 5vh; width: 80%; text-align: center; ">
-        <input type="submit" value="creat" style="width:30%;border-radius: 30px;height: 5vh;">
+        <input type="submit" value="Update" style="width:30%;border-radius: 30px;height: 5vh;">
         </form>
     </div>
 </body>
